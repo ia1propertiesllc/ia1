@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <rect width="1024" height="1024" fill="#ffffff"/>
+  <g transform="translate(512 512)">
+    <!-- Rounded sky tile -->
+    <rect x="-320" y="-320" width="640" height="640" rx="120" fill="#0ea5e9"/>
+
+    <!-- "I" as chimney: narrow stack with a wider cap -->
+    <!-- Body -->
+    <rect x="-248" y="-168" width="86" height="400" fill="#ffffff"/>
+    <!-- Cap (wider, short) -->
+    <rect x="-268" y="-210" width="126" height="42" fill="#ffffff"/>
+
+    <!-- "A" as house -->
+    <!-- Roof triangle (steep pitch → reads as A's apex) -->
+    <polygon points="70,-230 -110,-30 250,-30" fill="#ffffff"/>
+    <!-- Walls -->
+    <rect x="-70" y="-30" width="280" height="262" fill="#ffffff"/>
+    <!-- Door cutout (tile color = reads as negative space) -->
+    <rect x="40" y="100" width="80" height="132" rx="8" fill="#0ea5e9"/>
+    <!-- Window cutout (small, upper-left of wall, adds A-crossbar hint) -->
+    <rect x="-30" y="30" width="50" height="50" rx="6" fill="#0ea5e9"/>
+    <!-- Second window (right) -->
+    <rect x="140" y="30" width="50" height="50" rx="6" fill="#0ea5e9"/>
+  </g>
+</svg>

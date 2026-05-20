@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <g transform="translate(512 512)">
+    <rect x="-320" y="-320" width="640" height="640" rx="120" fill="#ffffff"/>
+    <!-- Chimney -->
+    <rect x="-248" y="-168" width="86" height="400" fill="#0ea5e9"/>
+    <rect x="-268" y="-210" width="126" height="42" fill="#0ea5e9"/>
+    <!-- House -->
+    <polygon points="70,-230 -110,-30 250,-30" fill="#0ea5e9"/>
+    <rect x="-70" y="-30" width="280" height="262" fill="#0ea5e9"/>
+    <rect x="40" y="100" width="80" height="132" rx="8" fill="#ffffff"/>
+    <rect x="-30" y="30" width="50" height="50" rx="6" fill="#ffffff"/>
+    <rect x="140" y="30" width="50" height="50" rx="6" fill="#ffffff"/>
+  </g>
+</svg>

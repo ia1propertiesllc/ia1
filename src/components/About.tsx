@@ -53,7 +53,6 @@ const reasons = [
 // Rolling gallery — before/after and on-site craftsmanship from recent projects.
 const gallerySlides = [
   { src: "/gallery/gallery-4.jpg", alt: "IA1 Construction project" },
-  { src: "/gallery/gallery-5.jpg", alt: "IA1 Construction project" },
   { src: "/gallery/gallery-6.jpg", alt: "IA1 Construction project" },
   { src: "/gallery/gallery-7.jpg", alt: "IA1 Construction project" },
   { src: "/gallery/gallery-8.jpg", alt: "IA1 Construction project" },

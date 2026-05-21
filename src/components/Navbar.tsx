@@ -11,6 +11,7 @@ const navLinks = [
   { label: "About", href: "/#about" },
   { label: "Projects", href: "/#projects" },
   { label: "Testimonials", href: "/#testimonials" },
+  { label: "Lots Available", href: "/contact" },
 ];
 
 export default function Navbar() {
@@ -36,12 +37,12 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
             <Image
-              src={scrolled ? "/ia1-logo.svg" : "/ia1-logo-white.svg"}
+              src="/ia1-logo-new.svg"
               alt="IA1 Construction"
               width={44}
               height={44}
               priority
-              className="h-11 w-11 transition-transform group-hover:scale-105"
+              className="h-11 w-11 rounded-lg transition-transform group-hover:scale-105"
             />
             <div className="flex flex-col">
               <span className={`text-lg font-black tracking-tight leading-tight ${scrolled ? "text-black" : "text-white"}`}>

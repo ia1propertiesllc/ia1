@@ -19,11 +19,11 @@ export default function Footer() {
           <div className="lg:col-span-1">
             <Link href="/" className="mb-4 flex items-center gap-2.5">
               <Image
-                src="/ia1-logo-white.svg"
+                src="/ia1-logo-new.svg"
                 alt="IA1 Construction"
                 width={44}
                 height={44}
-                className="h-11 w-11"
+                className="h-11 w-11 rounded-lg"
               />
               <div className="flex flex-col">
                 <span className="text-lg font-black tracking-tight text-white leading-tight">

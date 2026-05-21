@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Send, Phone, Mail, Clock, MapPin } from "lucide-react";
+import { Send, Phone, Mail, Clock, MapPin, AlertTriangle } from "lucide-react";
+import { Forminit } from "forminit";
+
+const FORM_ID = "jemj8f49y9s";
 
 const contactInfo = [
   {
@@ -32,18 +35,28 @@ const contactInfo = [
 ];
 
 export default function Contact() {
-  const [formState, setFormState] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    service: "",
-    message: "",
-  });
-  const [submitted, setSubmitted] = useState(false);
-
-  function handleSubmit(e: React.FormEvent) {
+  const [status, setStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setSubmitted(true);
+    setStatus("loading");
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    const forminit = new Forminit({ proxyUrl: "/api/forminit" });
+
+    try {
+      const { error } = await forminit.submit(FORM_ID, formData);
+      if (error) {
+        setStatus("error");
+        return;
+      }
+      setStatus("success");
+      form.reset();
+    } catch {
+      setStatus("error");
+    }
   }
 
   return (
@@ -109,7 +122,7 @@ export default function Contact() {
             transition={{ duration: 0.6 }}
             className="lg:col-span-3"
           >
-            {submitted ? (
+            {status === "success" ? (
               <div className="flex h-full flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white p-12 text-center">
                 <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-sky-100">
                   <Send className="h-8 w-8 text-sky-600" />
@@ -121,6 +134,33 @@ export default function Contact() {
                   We&apos;ve received your request. Our team will contact you
                   within 24 hours with a detailed estimate.
                 </p>
+              </div>
+            ) : status === "error" ? (
+              <div className="flex h-full flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white p-12 text-center">
+                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+                  <AlertTriangle className="h-8 w-8 text-red-600" />
+                </div>
+                <h3 className="mb-2 text-2xl font-bold text-black">
+                  Something went wrong
+                </h3>
+                <p className="mb-6 text-slate-600">
+                  We couldn&apos;t send your message right now. Please try again
+                  later, or reach us directly at{" "}
+                  <a
+                    href="tel:+13363655389"
+                    className="font-semibold text-sky-600 hover:underline"
+                  >
+                    336-365-5389
+                  </a>
+                  .
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setStatus("idle")}
+                  className="rounded-xl bg-sky-500 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-sky-500/25 transition-all hover:bg-sky-600 hover:-translate-y-0.5"
+                >
+                  Try Again
+                </button>
               </div>
             ) : (
               <form
@@ -134,11 +174,8 @@ export default function Contact() {
                     </label>
                     <input
                       type="text"
+                      name="fi-sender-fullName"
                       required
-                      value={formState.name}
-                      onChange={(e) =>
-                        setFormState({ ...formState, name: e.target.value })
-                      }
                       placeholder="John Smith"
                       className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-black placeholder:text-slate-400 transition-colors focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none"
                     />
@@ -149,11 +186,8 @@ export default function Contact() {
                     </label>
                     <input
                       type="email"
+                      name="fi-sender-email"
                       required
-                      value={formState.email}
-                      onChange={(e) =>
-                        setFormState({ ...formState, email: e.target.value })
-                      }
                       placeholder="john@example.com"
                       className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-black placeholder:text-slate-400 transition-colors focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none"
                     />
@@ -164,11 +198,8 @@ export default function Contact() {
                     </label>
                     <input
                       type="tel"
-                      value={formState.phone}
-                      onChange={(e) =>
-                        setFormState({ ...formState, phone: e.target.value })
-                      }
-                      placeholder="(555) 000-0000"
+                      name="fi-sender-phone"
+                      placeholder="+1 555 000 0000"
                       className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-black placeholder:text-slate-400 transition-colors focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none"
                     />
                   </div>
@@ -177,14 +208,14 @@ export default function Contact() {
                       Service Needed *
                     </label>
                     <select
+                      name="fi-select-service"
                       required
-                      value={formState.service}
-                      onChange={(e) =>
-                        setFormState({ ...formState, service: e.target.value })
-                      }
+                      defaultValue=""
                       className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-black transition-colors focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none"
                     >
-                      <option value="">Select a service</option>
+                      <option value="" disabled>
+                        Select a service
+                      </option>
                       <option value="residential">
                         Residential Construction
                       </option>
@@ -196,6 +227,7 @@ export default function Contact() {
                       </option>
                       <option value="design">Design & Planning</option>
                       <option value="general">General Contracting</option>
+                      <option value="lots">Lots Available / Build</option>
                     </select>
                   </div>
                 </div>
@@ -204,21 +236,20 @@ export default function Contact() {
                     Project Details
                   </label>
                   <textarea
+                    name="fi-text-message"
                     rows={4}
-                    value={formState.message}
-                    onChange={(e) =>
-                      setFormState({ ...formState, message: e.target.value })
-                    }
                     placeholder="Tell us about your project, timeline, and budget range..."
                     className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-black placeholder:text-slate-400 transition-colors focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none resize-none"
                   />
                 </div>
+
                 <button
                   type="submit"
-                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-sky-500 px-8 py-4 text-base font-bold text-white shadow-lg shadow-sky-500/25 transition-all hover:bg-sky-600 hover:shadow-sky-600/30 hover:-translate-y-0.5"
+                  disabled={status === "loading"}
+                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-sky-500 px-8 py-4 text-base font-bold text-white shadow-lg shadow-sky-500/25 transition-all hover:bg-sky-600 hover:shadow-sky-600/30 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
                 >
                   <Send className="h-5 w-5" />
-                  Contact Us
+                  {status === "loading" ? "Sending..." : "Contact Us"}
                 </button>
                 <p className="mt-4 text-center text-xs text-slate-500">
                   No spam, no pressure. Just a straight-forward estimate.

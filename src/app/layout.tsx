@@ -13,6 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://ia1construction.com"),
   title: "IA1 Construction | Quality Home Builds & Renovations — Serving the Triad, NC",
   description:
     "IA1 Construction delivers quality home builds, custom projects, new construction, and renovations across the Triad and surrounding areas of North Carolina. Licensed, bonded & insured. Get a free estimate today.",

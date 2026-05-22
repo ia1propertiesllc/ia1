@@ -37,7 +37,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
             <Image
-              src="/ia1-logo-new.svg"
+              src="/ia1-logo-new.png"
               alt="IA1 Construction"
               width={44}
               height={44}

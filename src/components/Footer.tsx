@@ -19,7 +19,7 @@ export default function Footer() {
           <div className="lg:col-span-1">
             <Link href="/" className="mb-4 flex items-center gap-2.5">
               <Image
-                src="/ia1-logo-new.svg"
+                src="/ia1-logo-new.png"
                 alt="IA1 Construction"
                 width={44}
                 height={44}

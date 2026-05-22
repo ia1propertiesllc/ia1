@@ -34,16 +34,68 @@ const contactInfo = [
   },
 ];
 
+/** Normalize any US phone input to E.164 (+1XXXXXXXXXX).
+ *  Returns null if the number can't be resolved to a valid US number. */
+function toE164(raw: string): string | null {
+  const digits = raw.replace(/\D/g, "");
+  if (digits.length === 10) return `+1${digits}`;
+  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
+  if (digits.length === 0) return ""; // optional field left blank
+  return null; // invalid
+}
+
+function validateEmail(email: string): string | null {
+  if (!email) return "Email is required.";
+  const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  return ok ? null : "Please enter a valid email address.";
+}
+
+function validatePhone(raw: string): string | null {
+  if (!raw.trim()) return "Phone number is required.";
+  const result = toE164(raw);
+  if (result === null)
+    return "Enter a 10-digit US number, e.g. (336) 365-5389.";
+  return null;
+}
+
+const inputBase =
+  "w-full rounded-lg border bg-white px-4 py-3 text-black placeholder:text-slate-400 transition-colors focus:ring-2 focus:outline-none";
+const inputNormal = `${inputBase} border-slate-300 focus:border-sky-500 focus:ring-sky-500/20`;
+const inputError = `${inputBase} border-red-400 focus:border-red-500 focus:ring-red-500/20`;
+
 export default function Contact() {
-  const [status, setStatus] = useState<
-    "idle" | "loading" | "success" | "error"
-  >("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [errors, setErrors] = useState<{ email?: string; phone?: string }>({});
+
+  function validate(form: HTMLFormElement): boolean {
+    const email = (form.elements.namedItem("fi-sender-email") as HTMLInputElement).value;
+    const phone = (form.elements.namedItem("fi-sender-phone") as HTMLInputElement).value;
+    const newErrors: { email?: string; phone?: string } = {};
+
+    const emailErr = validateEmail(email);
+    if (emailErr) newErrors.email = emailErr;
+
+    const phoneErr = validatePhone(phone);
+    if (phoneErr) newErrors.phone = phoneErr;
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const form = e.currentTarget;
+
+    if (!validate(form)) return;
+
     setStatus("loading");
 
-    const form = e.currentTarget;
+    // Normalize phone to E.164 before handing off to Forminit
     const formData = new FormData(form);
+    const rawPhone = formData.get("fi-sender-phone") as string;
+    const e164 = toE164(rawPhone);
+    if (e164) formData.set("fi-sender-phone", e164);
+
     const forminit = new Forminit({ proxyUrl: "/api/forminit" });
 
     try {
@@ -54,6 +106,7 @@ export default function Contact() {
       }
       setStatus("success");
       form.reset();
+      setErrors({});
     } catch {
       setStatus("error");
     }
@@ -103,12 +156,8 @@ export default function Contact() {
                   <item.icon className="h-6 w-6 text-sky-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-slate-500">
-                    {item.label}
-                  </p>
-                  <p className="text-base font-semibold text-black">
-                    {item.value}
-                  </p>
+                  <p className="text-sm font-medium text-slate-500">{item.label}</p>
+                  <p className="text-base font-semibold text-black">{item.value}</p>
                 </div>
               </a>
             ))}
@@ -127,9 +176,7 @@ export default function Contact() {
                 <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-sky-100">
                   <Send className="h-8 w-8 text-sky-600" />
                 </div>
-                <h3 className="mb-2 text-2xl font-bold text-black">
-                  Thank You!
-                </h3>
+                <h3 className="mb-2 text-2xl font-bold text-black">Thank You!</h3>
                 <p className="text-slate-600">
                   We&apos;ve received your request. Our team will contact you
                   within 24 hours with a detailed estimate.
@@ -168,6 +215,7 @@ export default function Contact() {
                 className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm sm:p-10"
               >
                 <div className="grid gap-6 sm:grid-cols-2">
+                  {/* Full Name */}
                   <div>
                     <label className="mb-2 block text-sm font-medium text-slate-700">
                       Full Name *
@@ -177,9 +225,11 @@ export default function Contact() {
                       name="fi-sender-fullName"
                       required
                       placeholder="John Smith"
-                      className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-black placeholder:text-slate-400 transition-colors focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none"
+                      className={inputNormal}
                     />
                   </div>
+
+                  {/* Email */}
                   <div>
                     <label className="mb-2 block text-sm font-medium text-slate-700">
                       Email Address *
@@ -189,20 +239,33 @@ export default function Contact() {
                       name="fi-sender-email"
                       required
                       placeholder="john@example.com"
-                      className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-black placeholder:text-slate-400 transition-colors focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none"
+                      onChange={() => errors.email && setErrors((e) => ({ ...e, email: undefined }))}
+                      className={errors.email ? inputError : inputNormal}
                     />
+                    {errors.email && (
+                      <p className="mt-1 text-xs text-red-600">{errors.email}</p>
+                    )}
                   </div>
+
+                  {/* Phone */}
                   <div>
                     <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Phone Number
+                      Phone Number *
                     </label>
                     <input
                       type="tel"
                       name="fi-sender-phone"
-                      placeholder="+1 555 000 0000"
-                      className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-black placeholder:text-slate-400 transition-colors focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none"
+                      required
+                      placeholder="(336) 365-5389"
+                      onChange={() => errors.phone && setErrors((e) => ({ ...e, phone: undefined }))}
+                      className={errors.phone ? inputError : inputNormal}
                     />
+                    {errors.phone && (
+                      <p className="mt-1 text-xs text-red-600">{errors.phone}</p>
+                    )}
                   </div>
+
+                  {/* Service */}
                   <div>
                     <label className="mb-2 block text-sm font-medium text-slate-700">
                       Service Needed *
@@ -211,26 +274,20 @@ export default function Contact() {
                       name="fi-select-service"
                       required
                       defaultValue=""
-                      className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-black transition-colors focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none"
+                      className={inputNormal}
                     >
-                      <option value="" disabled>
-                        Select a service
-                      </option>
-                      <option value="residential">
-                        Residential Construction
-                      </option>
-                      <option value="renovation">
-                        Renovation & Remodeling
-                      </option>
-                      <option value="finishing">
-                        Interior & Exterior Finishing
-                      </option>
+                      <option value="" disabled>Select a service</option>
+                      <option value="residential">Residential Construction</option>
+                      <option value="renovation">Renovation & Remodeling</option>
+                      <option value="finishing">Interior & Exterior Finishing</option>
                       <option value="design">Design & Planning</option>
                       <option value="general">General Contracting</option>
                       <option value="lots">Lots Available / Build</option>
                     </select>
                   </div>
                 </div>
+
+                {/* Message */}
                 <div className="mt-6">
                   <label className="mb-2 block text-sm font-medium text-slate-700">
                     Project Details
@@ -239,7 +296,7 @@ export default function Contact() {
                     name="fi-text-message"
                     rows={4}
                     placeholder="Tell us about your project, timeline, and budget range..."
-                    className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-black placeholder:text-slate-400 transition-colors focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none resize-none"
+                    className={`${inputNormal} resize-none`}
                   />
                 </div>
 
